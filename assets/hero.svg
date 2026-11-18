@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="ARTEX detection-as-code: Sigma rules compiled to Splunk SPL and Microsoft Sentinel KQL">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="sigmaFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f59e0b"/><stop offset="1" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="splFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7dd41f"/><stop offset="1" stop-color="#3f6212"/>
+    </linearGradient>
+    <linearGradient id="kqlFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2aa5ff"/><stop offset="1" stop-color="#0b4a8f"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .t    { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+      .brand{ font-weight: 800; letter-spacing: 2px; }
+      .sub  { font-weight: 600; letter-spacing: .5px; }
+      .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; }
+      .node { font-weight: 700; }
+      .pill { font-weight: 600; }
+    </style>
+  </defs>
+
+  <!-- backdrop -->
+  <rect width="1200" height="340" fill="url(#bg)"/>
+  <g stroke="#21262d" stroke-width="1">
+    <line x1="0" y1="85"  x2="1200" y2="85"/>
+    <line x1="0" y1="255" x2="1200" y2="255"/>
+  </g>
+
+  <!-- title -->
+  <g class="t" text-anchor="middle" opacity="0">
+    <text x="600" y="50" class="brand" font-size="34" fill="#e6edf3">A R T E X</text>
+    <text x="600" y="74" class="sub mono" font-size="15" fill="#8b949e">detection-as-code &#183; Sigma &#8594; SPL + KQL</text>
+    <animate attributeName="opacity" from="0" to="1" dur="1s" begin="0s" fill="freeze"/>
+  </g>
+
+  <!-- ============ connectors (drawn first, behind nodes) ============ -->
+  <g fill="none" stroke-width="3">
+    <!-- Sigma -> pipelines -->
+    <path id="c1" d="M300,170 H470" stroke="#30363d"/>
+    <path d="M300,170 H470" stroke="#58a6ff" stroke-width="3" stroke-dasharray="14 150">
+      <animate attributeName="stroke-dashoffset" from="164" to="0" dur="1.6s" repeatCount="indefinite"/>
+    </path>
+    <!-- pipelines -> Splunk -->
+    <path id="c2" d="M730,150 C800,150 820,120 900,120" stroke="#30363d"/>
+    <path d="M730,150 C800,150 820,120 900,120" stroke="#7dd41f" stroke-width="3" stroke-dasharray="14 190">
+      <animate attributeName="stroke-dashoffset" from="204" to="0" dur="1.8s" repeatCount="indefinite"/>
+    </path>
+    <!-- pipelines -> Sentinel -->
+    <path id="c3" d="M730,190 C800,190 820,220 900,220" stroke="#30363d"/>
+    <path d="M730,190 C800,190 820,220 900,220" stroke="#2aa5ff" stroke-width="3" stroke-dasharray="14 190">
+      <animate attributeName="stroke-dashoffset" from="204" to="0" dur="1.8s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- traveling packets -->
+  <circle r="4.5" fill="#58a6ff" filter="url(#glow)">
+    <animateMotion dur="1.6s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear">
+      <mpath href="#c1"/>
+    </animateMotion>
+  </circle>
+  <circle r="4.5" fill="#7dd41f" filter="url(#glow)">
+    <animateMotion dur="1.8s" begin="0.3s" repeatCount="indefinite"><mpath href="#c2"/></animateMotion>
+  </circle>
+  <circle r="4.5" fill="#2aa5ff" filter="url(#glow)">
+    <animateMotion dur="1.8s" begin="0.6s" repeatCount="indefinite"><mpath href="#c3"/></animateMotion>
+  </circle>
+
+  <!-- ============ nodes ============ -->
+  <!-- Sigma source -->
+  <g class="t" text-anchor="middle">
+    <rect x="120" y="135" width="180" height="70" rx="12" fill="url(#sigmaFill)" opacity="0.95"/>
+    <rect x="120" y="135" width="180" height="70" rx="12" fill="none" stroke="#f8c471" stroke-width="1.5">
+      <animate attributeName="opacity" values="1;0.35;1" dur="2.4s" repeatCount="indefinite"/>
+    </rect>
+    <text x="210" y="167" class="node" font-size="17" fill="#1a1205">Sigma rules</text>
+    <text x="210" y="188" class="mono" font-size="12" fill="#2b1d06">5 atomic &#183; 4 correlation</text>
+  </g>
+
+  <!-- pipelines -->
+  <g class="t" text-anchor="middle">
+    <rect x="470" y="130" width="260" height="80" rx="12" fill="#1f2937" stroke="#58a6ff" stroke-width="1.5"/>
+    <text x="600" y="160" class="node" font-size="16" fill="#e6edf3">pySigma pipelines</text>
+    <text x="600" y="182" class="mono" font-size="11.5" fill="#8b949e">community base + house layer</text>
+    <text x="600" y="199" class="mono" font-size="11.5" fill="#6e7681">pinned &#183; version-controlled</text>
+  </g>
+
+  <!-- Splunk -->
+  <g class="t" text-anchor="middle">
+    <rect x="900" y="90" width="200" height="62" rx="12" fill="url(#splFill)" opacity="0.95"/>
+    <text x="1000" y="118" class="node" font-size="16" fill="#0a1403">Splunk</text>
+    <text x="1000" y="138" class="mono" font-size="12" fill="#13250a">SPL &#183; CIM</text>
+  </g>
+
+  <!-- Sentinel -->
+  <g class="t" text-anchor="middle">
+    <rect x="900" y="188" width="200" height="62" rx="12" fill="url(#kqlFill)" opacity="0.95"/>
+    <text x="1000" y="216" class="node" font-size="16" fill="#eaf4ff">Microsoft Sentinel</text>
+    <text x="1000" y="236" class="mono" font-size="12" fill="#cfe6ff">KQL &#183; ASIM</text>
+  </g>
+
+  <!-- footer pills -->
+  <g class="t pill" font-size="12.5" text-anchor="middle">
+    <g>
+      <rect x="360" y="285" width="150" height="30" rx="15" fill="#161b22" stroke="#30363d"/>
+      <text x="435" y="305" fill="#7dd41f">sigma check &#10003;</text>
+    </g>
+    <g>
+      <rect x="525" y="285" width="150" height="30" rx="15" fill="#161b22" stroke="#30363d"/>
+      <text x="600" y="305" fill="#58a6ff">both targets &#10003;</text>
+    </g>
+    <g>
+      <rect x="690" y="285" width="150" height="30" rx="15" fill="#161b22" stroke="#30363d"/>
+      <text x="765" y="305" fill="#f59e0b">correlations routed</text>
+    </g>
+    <animate attributeName="opacity" from="0" to="1" dur="1s" begin="0.8s" fill="freeze"/>
+  </g>
+</svg>
