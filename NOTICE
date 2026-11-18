@@ -1,0 +1,33 @@
+artex-detection-as-code
+========================
+
+Contents
+--------
+1. detection-as-code/  — Detection-as-code tooling: a reproducible Sigma -> SPL
+   (Splunk) + KQL (Microsoft Sentinel) build with per-target pySigma processing
+   pipelines, a pinned sigma-cli toolchain (Dockerfile + requirements.lock), a
+   build script and a Makefile. Original work.
+2. detections/sigma/   — Sigma detection rules (atomic + correlation) derived
+   from the ARTEX project.
+
+ARTEX attribution
+-----------------
+The Sigma rules under detections/sigma/ are derived from the ARTEX project:
+  upstream : https://github.com/Autumn-27/ARTEX        (AGPL-3.0)
+  fork used: https://github.com/jiwoochris/artex-global (AGPL-3.0)
+
+They are licensed under the GNU Affero General Public License v3.0 (see LICENSE).
+
+Modifications by logsexe
+------------------------
+2026-11-17 — Added the detection-as-code/ tooling: a per-target pySigma
+             processing-pipeline chain (one community base + one thin house
+             pipeline per target) and a build that emits per-rule SPL and KQL,
+             routing Kusto-rejected Sigma correlation rules to a native-rebuild
+             list instead of dropping them. The Sigma rules themselves are
+             unmodified from the artex-global fork.
+
+Because this repository includes ARTEX-derived files, the entire repository is
+distributed under AGPL-3.0 (see LICENSE). AGPL-3.0 §5 requires that modified
+files carry prominent notices stating that they were changed and the date of
+change; this NOTICE and the per-directory READMEs provide that record.

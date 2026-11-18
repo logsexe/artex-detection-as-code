@@ -1,0 +1,39 @@
+# ARTEX house pipeline — Microsoft Sentinel (ASIM) target
+#
+# Thin, in-house layer that runs BEFORE the community `sentinel_asim` pipeline
+# (hence a LOWER priority number — pySigma applies pipelines in ascending
+# priority order). Its only job is to fix leftovers the big community pipeline
+# cannot know about, so we never fork sentinel_asim itself:
+#
+#   1. Field-name normalisation the community schema expects.
+#      The ARTEX webserver rule uses the Sigma field `cs-user-agent`
+#      (lower-case). ASIM's imWebSession mapping only recognises the
+#      canonical `HttpUserAgent` / `cs-User-Agent`. We rename it here, up
+#      front, so ASIM's own field validation (which runs at priority 10 and
+#      would otherwise abort the conversion) sees a field it knows.
+#
+#   2. A query_table for the keyword-only application rule.
+#      `artex_guard_audit_framing` is a logsource:application keyword hunt with
+#      no field and no category ASIM maps to a table. We pin a house table name
+#      so it still emits a runnable KQL query. Adjust ArtexAppLog_CL to whatever
+#      custom log table your guard/audit events actually land in.
+#
+# Pin: pySigma-backend-kusto 1.0.1 (ships sentinel_asim), sigma-cli 3.1.0.
+name: artex_sentinel_asim_house
+priority: 5
+transformations:
+  - id: artex_webserver_ua_normalise
+    type: field_name_mapping
+    mapping:
+      cs-user-agent: HttpUserAgent
+    rule_conditions:
+      - type: logsource
+        category: webserver
+
+  - id: artex_application_query_table
+    type: set_state
+    key: query_table
+    val: ArtexAppLog_CL
+    rule_conditions:
+      - type: logsource
+        category: application

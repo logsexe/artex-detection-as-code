@@ -1,0 +1,65 @@
+# ARTEX house pipeline — Splunk (CIM) target
+#
+# Thin, in-house layer that runs AFTER the community `splunk_windows` pipeline
+# (hence a HIGHER priority number — pySigma applies pipelines in ascending
+# priority order). splunk_windows scopes the Windows-native logsources
+# (process_creation, file_event) to their Sysmon index/sourcetype; it leaves the
+# generic Sigma field names untouched. This house layer maps those leftover
+# fields onto Splunk CIM field names so the emitted SPL lines up with CIM data
+# models, and adds a sourcetype scope for the web/proxy logsources the community
+# pipeline does not cover.
+#
+# Keep it thin: one base community pipeline + this house pipeline, layered by
+# priority. Do NOT fork splunk_windows.
+#
+# For tstats against a CIM data model instead of raw SPL, convert with
+#   -f data_model   (the splunk backend's data_model output format).
+#
+# Pin: pySigma-backend-splunk 2.1.0 (ships splunk_windows / splunk_cim),
+#      sigma-cli 3.1.0.
+name: artex_splunk_cim_house
+priority: 30
+transformations:
+  # Web / proxy User-Agent fields -> CIM Web.http_user_agent
+  - id: artex_ua_to_cim
+    type: field_name_mapping
+    mapping:
+      cs-user-agent: http_user_agent
+      c-useragent: http_user_agent
+    rule_conditions:
+      - type: logsource
+        category: webserver
+      - type: logsource
+        category: proxy
+    rule_cond_op: or
+
+  # file_event TargetFilename -> CIM Endpoint.Filesystem file_path
+  - id: artex_file_to_cim
+    type: field_name_mapping
+    mapping:
+      TargetFilename: file_path
+    rule_conditions:
+      - type: logsource
+        category: file_event
+
+  # process_creation CommandLine -> CIM Endpoint.Processes process
+  - id: artex_cmd_to_cim
+    type: field_name_mapping
+    mapping:
+      CommandLine: process
+    rule_conditions:
+      - type: logsource
+        category: process_creation
+
+  # Scope the web/proxy logsources to a CIM-style sourcetype (house scoping the
+  # community splunk_windows pipeline does not provide for non-Windows sources).
+  - id: artex_web_sourcetype_scope
+    type: add_condition
+    conditions:
+      sourcetype: artex:web
+    rule_conditions:
+      - type: logsource
+        category: webserver
+      - type: logsource
+        category: proxy
+    rule_cond_op: or

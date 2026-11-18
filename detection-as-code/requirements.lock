@@ -1,0 +1,11 @@
+# ARTEX detection-as-code toolchain lock.
+# Versions mirror ARTEX's pinned detection test suites (detections/tests/*).
+# Bump deliberately, re-run `make build` + the ARTEX suites, commit together.
+sigma-cli==3.1.0
+pySigma==1.5.1
+pysigma-backend-splunk==2.1.0
+pySigma-backend-kusto==1.0.1
+pySigma-backend-elasticsearch==2.1.1
+pySigma-backend-loki==0.15.1
+pySigma-validators-sigmahq==0.21.0
+pyparsing==3.3.3
