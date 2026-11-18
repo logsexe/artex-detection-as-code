@@ -1,5 +1,7 @@
 # artex-detection-as-code
 
+[![detection-as-code](https://github.com/logsexe/artex-detection-as-code/actions/workflows/detection-as-code.yml/badge.svg)](https://github.com/logsexe/artex-detection-as-code/actions/workflows/detection-as-code.yml)
+
 Version-controlled **detection-as-code** for the ARTEX Sigma rules, targeting
 **both** of our SIEMs:
 
@@ -20,6 +22,8 @@ detection-as-code/      build tooling + house pipelines (see its README)
   Makefile              make image | build | demo | clean
   pipelines/            house pipelines (code, version-controlled)
 detections/sigma/       Sigma SOURCE rules (atomic *.yml + correlation/)
+detections/tests/       ARTEX's own Sigma detection suites (run in CI)
+  sigma/  sigma_lint/  sigma_match/  sigma_backends/
 LICENSE                 GNU AGPL-3.0
 NOTICE                  ARTEX attribution + modification record
 ```
@@ -39,6 +43,14 @@ pipeline chains, pinned versions, and the correlation-routing rationale.
 | Splunk (SPL)   | splunk  | `splunk_windows` | `pipelines/splunk_artex_house.yml`            |
 | Sentinel (KQL) | kusto   | `sentinel_asim`  | `pipelines/sentinel_asim_artex_house.yml`     |
 
+## CI
+`.github/workflows/detection-as-code.yml` runs on every push / PR:
+- **build** — compiles the whole Sigma tree to SPL + KQL, enforces sanity gates
+  (every atomic rule converts to both targets; every correlation rule is in SPL
+  **and** routed to `unsupported.txt`), and uploads the compiled detections.
+- **sigma-suites** — runs ARTEX's own pinned detection suites from
+  `detections/tests/`: `sigma`, `sigma_lint`, `sigma_match`, `sigma_backends`.
+
 ## Known routing (by design)
 A single Sigma detection converts to **both** Splunk and Kusto. A Sigma
 **correlation** rule converts on Splunk but Kusto rejects it
@@ -47,5 +59,5 @@ A single Sigma detection converts to **both** Splunk and Kusto. A Sigma
 scheduled/NRT KQL analytics rules — never silently dropped.
 
 ## License
-AGPL-3.0. The `detections/sigma/` rules are derived from ARTEX
+AGPL-3.0. The `detections/` content is derived from ARTEX
 (Autumn-27/ARTEX via jiwoochris/artex-global, AGPL-3.0); see `NOTICE`.

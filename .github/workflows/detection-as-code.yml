@@ -1,19 +1,20 @@
 name: detection-as-code
 
-# Exercise the Sigma -> SPL + KQL conversion on every push / PR, so a broken
-# rule or pipeline fails CI before it is promoted. The build runs the pinned
-# sigma-cli toolchain in Docker (the only dependency), exactly like locally.
+# Exercise the Sigma -> SPL + KQL conversion AND ARTEX's own Sigma detection
+# suites on every push / PR, so a broken rule or pipeline fails CI before it is
+# promoted. Everything runs the pinned sigma-cli toolchain in Docker (the only
+# dependency), exactly like locally.
 
 on:
   push:
     branches: [main]
     paths:
-      - 'detections/sigma/**'
+      - 'detections/**'
       - 'detection-as-code/**'
       - '.github/workflows/detection-as-code.yml'
   pull_request:
     paths:
-      - 'detections/sigma/**'
+      - 'detections/**'
       - 'detection-as-code/**'
       - '.github/workflows/detection-as-code.yml'
   workflow_dispatch: {}
@@ -63,3 +64,26 @@ jobs:
           name: detections-build
           path: detection-as-code/build/
           if-no-files-found: error
+
+  sigma-suites:
+    # ARTEX's own pinned detection test suites (detections/tests/*). Each run.sh
+    # launches the pinned sigma-cli / pySigma in a container and asserts the
+    # rules validate, convert, and match their sample events.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ARTEX Sigma suites (sigma, sigma_lint, sigma_match, sigma_backends)
+        run: |
+          set -euo pipefail
+          fail=0
+          for s in sigma sigma_lint sigma_match sigma_backends; do
+            echo "::group::$s"
+            if detections/tests/$s/run.sh; then
+              echo "PASS  $s"
+            else
+              echo "FAIL  $s"; fail=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $fail
