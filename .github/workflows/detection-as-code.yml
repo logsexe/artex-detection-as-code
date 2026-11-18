@@ -1,0 +1,65 @@
+name: detection-as-code
+
+# Exercise the Sigma -> SPL + KQL conversion on every push / PR, so a broken
+# rule or pipeline fails CI before it is promoted. The build runs the pinned
+# sigma-cli toolchain in Docker (the only dependency), exactly like locally.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'detections/sigma/**'
+      - 'detection-as-code/**'
+      - '.github/workflows/detection-as-code.yml'
+  pull_request:
+    paths:
+      - 'detections/sigma/**'
+      - 'detection-as-code/**'
+      - '.github/workflows/detection-as-code.yml'
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build SPL + KQL (make build)
+        working-directory: detection-as-code
+        run: make build
+
+      - name: Show build summary
+        working-directory: detection-as-code
+        run: |
+          echo "### SPL files";        ls -1 build/spl
+          echo "### KQL files";        ls -1 build/kql
+          echo "### unsupported.txt";  cat build/unsupported.txt
+
+      - name: Sanity gates
+        working-directory: detection-as-code
+        run: |
+          set -euo pipefail
+          spl=$(find build/spl -name '*.spl' | wc -l)
+          kql=$(find build/kql -name '*.kql' | wc -l)
+          # Every atomic rule must convert to BOTH targets.
+          atomic=$(find ../detections/sigma -maxdepth 1 -name '*.yml' | wc -l)
+          test "$kql" -ge "$atomic" || { echo "KQL ($kql) < atomic rules ($atomic)"; exit 1; }
+          test "$spl" -ge "$atomic" || { echo "SPL ($spl) < atomic rules ($atomic)"; exit 1; }
+          # Every correlation rule must be routed to unsupported.txt on Kusto
+          # (converts on Splunk, rejected on Kusto by design — never dropped).
+          for f in ../detections/sigma/correlation/*.yml; do
+            name=$(basename "$f" .yml)
+            grep -q "$name" build/unsupported.txt \
+              || { echo "correlation '$name' missing from unsupported.txt"; exit 1; }
+            test -f "build/spl/$name.spl" \
+              || { echo "correlation '$name' did not convert to SPL"; exit 1; }
+          done
+          echo "OK: $spl SPL, $kql KQL, correlations routed."
+
+      - name: Upload compiled detections
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detections-build
+          path: detection-as-code/build/
+          if-no-files-found: error
